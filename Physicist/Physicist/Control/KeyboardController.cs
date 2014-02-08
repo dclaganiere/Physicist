@@ -1,4 +1,4 @@
-﻿namespace Physicist.Control
+﻿namespace Physicist.Controls
 {
     using System;
     using System.Collections.Generic;
@@ -10,6 +10,19 @@
     public static class KeyboardController
     {
         private static Dictionary<StandardKeyAction, Keys> mappedKeys = null;
+
+        static KeyboardController()
+        {
+            if (KeyboardController.mappedKeys == null)
+            {
+                KeyboardController.mappedKeys = new Dictionary<StandardKeyAction, Keys>();
+                KeyboardController.mappedKeys.Add(StandardKeyAction.Up, Keys.Up);
+                KeyboardController.mappedKeys.Add(StandardKeyAction.Down, Keys.Down);
+                KeyboardController.mappedKeys.Add(StandardKeyAction.Left, Keys.Left);
+                KeyboardController.mappedKeys.Add(StandardKeyAction.Right, Keys.Right);
+                KeyboardController.mappedKeys.Add(StandardKeyAction.Jump, Keys.Space);
+            }
+        }
 
         public static Keys UpKey
         {
@@ -55,16 +68,6 @@
         {
             get
             {
-                if (KeyboardController.mappedKeys == null)
-                {
-                    KeyboardController.mappedKeys = new Dictionary<StandardKeyAction, Keys>();
-                    KeyboardController.mappedKeys.Add(StandardKeyAction.Up, Keys.Up);
-                    KeyboardController.mappedKeys.Add(StandardKeyAction.Down, Keys.Down);
-                    KeyboardController.mappedKeys.Add(StandardKeyAction.Left, Keys.Left);
-                    KeyboardController.mappedKeys.Add(StandardKeyAction.Right, Keys.Right);
-                    KeyboardController.mappedKeys.Add(StandardKeyAction.Jump, Keys.Space);
-                }
-
                 return KeyboardController.mappedKeys;
             }
         }

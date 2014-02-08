@@ -25,6 +25,8 @@
         private GraphicsDeviceManager graphics;
         private SpriteBatch spriteBatch;
         private Texture2D testText;
+        private Rectangle backgroundsize;
+        private Vertices platformVert;
         
         // TEST OBJECTS
         private Player test;
@@ -59,12 +61,15 @@
             base.Initialize();
         }
 
+        private SpriteFont myFont;
+
         /// <summary>
         /// LoadContent will be called once per game and is the place to load
         /// all of your content.
         /// </summary>
         protected override void LoadContent()
         {
+            myFont = this.Content.Load<SpriteFont>("Fonts\\Pericles6");
             // Create a new SpriteBatch, which can be used to draw textures.
             this.spriteBatch = new SpriteBatch(GraphicsDevice);
 
@@ -108,6 +113,8 @@
             base.Update(gameTime);
         }
 
+        public static Fixture Joint;
+
         /// <summary>
         /// This is called when the game should draw itself.
         /// </summary>
@@ -117,10 +124,14 @@
             GraphicsDevice.Clear(Color.CornflowerBlue);
             this.spriteBatch.Begin();
 
-            this.test.Draw(this.spriteBatch);
+            this.spriteBatch.Draw(this.testText, this.platformVert[0].ToDisplayUnits(), Color.White); 
 
-            // TEST WITH MADE TEXTURE
-            this.spriteBatch.Draw(this.testText, this.test.Body.Position, Color.White); 
+            this.spriteBatch.DrawString(myFont, this.test.Position.ToString(), new Vector2(300, 40), Color.Black, 0f, Vector2.Zero, 2f, SpriteEffects.None, 0f);
+            if (Joint != null)
+            {
+             //   this.spriteBatch.DrawString(myFont, Joint.Position.ToString(), new Vector2(300, 60), Color.Black, 0f, Vector2.Zero, 2f, SpriteEffects.None, 0f);
+            }
+            this.test.Draw(this.spriteBatch);
 
             base.Draw(gameTime);
 
@@ -131,31 +142,39 @@
         private void SetupWorld()
         {
             MainGame.world = new World(new Vector2(0f, 9.81f));
-            ConvertUnits.SetDisplayUnitToSimUnitRatio(100f);
+            ConvertUnits.SetDisplayUnitToSimUnitRatio(1f);
 
             Vertices borderVerts = new Vertices();
-            borderVerts.Add(Vector2.Zero);
-            borderVerts.Add(new Vector2(0, this.GraphicsDevice.Viewport.Height));
-            borderVerts.Add(new Vector2(this.GraphicsDevice.Viewport.Width, this.GraphicsDevice.Viewport.Height));
-            borderVerts.Add(new Vector2(this.GraphicsDevice.Viewport.Width, 0));
+            borderVerts.Add(Vector2.Zero.ToSimUnits());
+            borderVerts.Add(new Vector2(0, this.GraphicsDevice.Viewport.Height).ToSimUnits());
+            borderVerts.Add(new Vector2(this.GraphicsDevice.Viewport.Width, this.GraphicsDevice.Viewport.Height).ToSimUnits());
+            borderVerts.Add(new Vector2(this.GraphicsDevice.Viewport.Width, 0).ToSimUnits());
 
             var border = BodyFactory.CreateLoopShape(MainGame.World, borderVerts);
             border.Friction = 1f;
+
+            this.backgroundsize = new Rectangle(100, 400, 100, 20);
+            this.testText = new Texture2D(this.GraphicsDevice, this.backgroundsize.Width, this.backgroundsize.Height);
+            Color[] colors = new Color[this.backgroundsize.Width * this.backgroundsize.Height];
+            for (int i = 0; i < colors.Length; i++)
+            {
+                colors[i] = new Color(255, 255, 0);
+            }
+
+            this.platformVert = new Vertices();
+            foreach (var corner in this.backgroundsize.GetCorners())
+            {
+                this.platformVert.Add(new Vector2(corner.X, corner.Y).ToSimUnits());
+            }
+
+            BodyFactory.CreateLoopShape(MainGame.World, this.platformVert);
+
+            this.testText.SetData(colors);
         }
 
         private void CreateActors()
         {
             this.texture = this.Content.Load<Texture2D>("Textures\\NOTSTOLEN");
-
-            // TEST TEXTURE AT CENTER POINT
-            this.testText = new Texture2D(this.GraphicsDevice, 2, 2);
-            Color[] colors = new Color[4];
-            for (int i = 0; i < 4; i++)
-            {
-                colors[i] = new Color(255, 255, 0);
-            }
-
-            this.testText.SetData(colors);
 
             GameSprite testSprite = new GameSprite(this.texture, new Size(19, 40));
             testSprite.AddAnimation(StandardAnimation.Idle, new SpriteAnimation(0, 1, 1));
@@ -168,11 +187,12 @@
             this.test = new Player();
             this.test.AddSprite("test", testSprite);
 
-            this.test.Body = BodyFactory.CreateRectangle(MainGame.world, 19f, 40f, 1f);
+            this.test.Body = BodyFactory.CreateRectangle(MainGame.world, ConvertUnits.ToSimUnits(19f), ConvertUnits.ToSimUnits(40f), 100f);
             this.test.Body.BodyType = BodyType.Dynamic;
             this.test.Body.CollidesWith = Category.All;
             this.test.Body.FixedRotation = true;
-            this.test.Position = Vector2.Zero;
+            this.test.Position = new Vector2(100f, 100f).ToSimUnits();
+            this.test.MaxSpeed = new Vector2(60f, 120f);
         }
     }
 }

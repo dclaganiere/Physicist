@@ -9,10 +9,12 @@
     using Microsoft.Xna.Framework;
     using Microsoft.Xna.Framework.Graphics;
     using Microsoft.Xna.Framework.Input;
+    using Physicist.Extensions;
 
     public class Actor
     {
         private Dictionary<string, GameSprite> sprites = new Dictionary<string, GameSprite>();
+        private Dictionary<string, CollisionSensor> sensors = new Dictionary<string,CollisionSensor>();
         private Body body;
 
         public Actor()
@@ -20,6 +22,14 @@
             this.VisibleState = Visibility.Visible;
             this.IsEnabled = true;
             this.Health = 1;
+        }
+
+        public IEnumerable<CollisionSensor> Sensors
+        {
+            get
+            {
+                return this.sensors.Values;
+            }
         }
 
         // Farseer Structures
@@ -49,10 +59,6 @@
                 this.body.Position = value;
             }
         }
-
-        public Vector2 Velocity { get; set; }
-        
-        public Vector2 Acceleration { get; set; }
         
         public float Rotation 
         {
@@ -68,6 +74,8 @@
         }
 
         public Vector2 MovementSpeed { get; set; }
+
+        public Vector2 MaxSpeed { get; set; }
 
         // gameplay state variables
         public int Health { get; set; }
@@ -101,7 +109,7 @@
                 {
                     foreach (var sprite in this.Sprites.Values)
                     {
-                        Vector2 shapeOffset = ((Vector2)sprite.FrameSize) / 2;
+                        Vector2 shapeOffset = (Vector2)sprite.FrameSize / 2.0f;
 
                         var effect = SpriteEffects.None;
                         if (sprite.CurrentAnimation.FlipHorizontal)
@@ -116,7 +124,7 @@
 
                         sb.Draw(
                             sprite.SpriteSheet,
-                            this.Position + sprite.Offset - shapeOffset,
+                            this.Position.ToDisplayUnits() + sprite.Offset - shapeOffset,
                             sprite.CurrentSprite,
                             Color.White,
                             this.Rotation,
@@ -124,6 +132,7 @@
                             1f,
                             effect,
                             sprite.Depth);
+
                     }
                 }
             }
@@ -149,6 +158,11 @@
                     sprite.Update(time);
                 }
             }
+        }
+
+        protected void AddSensor(CollisionSensor sensor)
+        {
+            this.sensors.Add(sensor.SensorName, sensor);
         }
     }
 }
