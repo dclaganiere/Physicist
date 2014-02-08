@@ -12,17 +12,17 @@
   
   <levelobjects>
 	  <backgrounds>
-		  <backdrop class="backdrop" textureref="" depth="">
+		  <backdrop class="Backdrop" textureref="" depth="">
 			  <location x="" y=""/>
 			  <dimensions width="" height=""/>
 		  </backdrop>
 		 
-		  <backgroundmusic class="backgroundmusic" soundref="">
+		  <backgroundmusic class="BackgroundMusic" soundref="">
 			  <location x="" y=""/>
 			  <dimension width="" height=""/>
 		  </backgroundmusic>
 		 
-		  <backgroudvideo class="backgroundvideo"/>		  
+		  <backgroudvideo class="BackgroundVideo"/>		  
 	  </backgrounds>
 	
 	  <foregrounds>

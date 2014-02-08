@@ -13,10 +13,12 @@
     using Microsoft.Xna.Framework.Graphics;
     using Microsoft.Xna.Framework.Input;
     using Physicist.Controls;
+    using Physicist.Extensions;
 
     public class Actor : IXmlSerializable
     {
         private Dictionary<string, GameSprite> sprites = new Dictionary<string, GameSprite>();
+        private Dictionary<string, CollisionSensor> sensors = new Dictionary<string,CollisionSensor>();
         private Body body;
         private BodyInfo bodyInfo;
 
@@ -26,7 +28,7 @@
         }
 
         public Actor()
-        {
+        {            
             this.VisibleState = Visibility.Visible;
             this.IsEnabled = true;
             this.Health = 1;
@@ -35,9 +37,17 @@
             this.bodyInfo.CollidesWith = Category.None;
         }
 
-        // Farseer Structures
-        public Body Body
+        public IEnumerable<CollisionSensor> Sensors
         {
+            get
+            {
+                return this.sensors.Values;
+            }
+        }
+
+        // Farseer Structures
+        public Body Body 
+        { 
             get
             {
                 return this.body;
@@ -50,7 +60,7 @@
         }
 
         // 2space variables
-        public Vector2 Position
+        public Vector2 Position 
         {
             get
             {
@@ -63,11 +73,7 @@
             }
         }
 
-        public Vector2 Velocity { get; set; }
-
-        public Vector2 Acceleration { get; set; }
-
-        public float Rotation
+        public float Rotation 
         {
             get
             {
@@ -82,12 +88,14 @@
 
         public Vector2 MovementSpeed { get; set; }
 
+        public Vector2 MaxSpeed { get; set; }
+
         // gameplay state variables
         public int Health { get; set; }
-
+        
         public bool IsEnabled { get; set; }
-
-        public bool IsDead
+        
+        public bool IsDead 
         {
             get
             {
@@ -96,7 +104,7 @@
         }
 
         // draw properties
-        public Dictionary<string, GameSprite> Sprites
+        public Dictionary<string, GameSprite> Sprites 
         {
             get
             {
@@ -114,7 +122,7 @@
                 {
                     foreach (var sprite in this.Sprites.Values)
                     {
-                        Vector2 shapeOffset = ((Vector2)sprite.FrameSize) / 2;
+                        Vector2 shapeOffset = (Vector2)sprite.FrameSize / 2.0f;
 
                         var effect = SpriteEffects.None;
                         if (sprite.CurrentAnimation.FlipHorizontal)
@@ -129,7 +137,7 @@
 
                         sb.Draw(
                             sprite.SpriteSheet,
-                            this.Position + sprite.Offset - shapeOffset,
+                            this.Position.ToDisplayUnits() + sprite.Offset - shapeOffset,
                             sprite.CurrentSprite,
                             Color.White,
                             this.Rotation,
@@ -137,6 +145,7 @@
                             1f,
                             effect,
                             sprite.Depth);
+
                     }
                 }
             }
@@ -153,7 +162,7 @@
         }
 
         public virtual void Update(GameTime time)
-        {
+        {           
             // update every sprite in the sprite collection
             if (this.IsEnabled)
             {
@@ -271,6 +280,11 @@
             this.IsEnabled = bool.Parse(element.Attribute("IsEnabled").Value);
 
             this.VisibleState = (Visibility)Enum.Parse(typeof(Visibility), element.Attribute("VisibleState").Value);
+        }
+
+        protected void AddSensor(CollisionSensor sensor)
+        {
+            this.sensors.Add(sensor.SensorName, sensor);
         }
     }
 }
