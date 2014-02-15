@@ -20,14 +20,17 @@
     public class MainGame : Game
     {
         private static World world;
+        private static Map map;
         private static List<Actor> actors;
         private static List<string> maps;
 
+        private Physicist.Controls.Viewport viewport;
+        private CameraController camera;
         private GraphicsDeviceManager graphics;
         private SpriteBatch spriteBatch;
         private Rectangle backgroundsize;
         private Vertices platformVert;
-        
+
         public MainGame()
             : base()
         {
@@ -55,6 +58,7 @@
         /// </summary>
         protected override void Initialize()
         {
+            FarseerPhysics.Settings.MaxPolygonVertices = 32;
             ContentController.Instance.Initialize(this.Content, "Content");
             MainGame.actors = new List<Actor>();
             MainGame.maps = new List<string>() { "Content\\Levels\\TestLevel.xml" };
@@ -71,7 +75,10 @@
         {
             // Create a new SpriteBatch, which can be used to draw textures.
             this.spriteBatch = new SpriteBatch(GraphicsDevice);
-
+            this.viewport = new Physicist.Controls.Viewport(new Extensions.Size(GraphicsDevice.Viewport.Width, GraphicsDevice.Viewport.Height));
+            this.camera = new CameraController();
+            this.camera.CameraViewport = this.viewport;
+            this.camera.Bounds = new Vector2(this.GraphicsDevice.Viewport.Width * 2, this.GraphicsDevice.Viewport.Height * 2);
             this.SetupWorld(MainGame.maps[0]);
         }
 
@@ -105,6 +112,7 @@
                     Player player = actor as Player;
                     if (player != null)
                     {
+                        this.camera.Following = player;
                         player.Update(gameTime, Keyboard.GetState());
                     }
                     else
@@ -112,6 +120,10 @@
                         actor.Update(gameTime);
                     }
                 }
+
+                // TODO: Add your update logic here
+                this.camera.CenterOnFollowing();
+                MainGame.map.Update(gameTime);
             }
 
             base.Update(gameTime);
@@ -124,9 +136,9 @@
         protected override void Draw(GameTime gameTime)
         {
             GraphicsDevice.Clear(Color.CornflowerBlue);
-            this.spriteBatch.Begin();
-
+            this.spriteBatch.Begin(SpriteSortMode.FrontToBack, BlendState.AlphaBlend, SamplerState.LinearClamp, DepthStencilState.Default, RasterizerState.CullCounterClockwise, null, this.camera.Transform);
             MainGame.actors.ForEach(actor => actor.Draw(this.spriteBatch));
+            MainGame.map.Draw(this.spriteBatch);
 
             base.Draw(gameTime);
 
@@ -137,45 +149,32 @@
         private void SetupWorld(string mapPath)
         {
             MainGame.world = new World(new Vector2(0f, 9.81f));
-            ConvertUnits.SetDisplayUnitToSimUnitRatio(1f);
+            ConvertUnits.SetDisplayUnitToSimUnitRatio(2f);
+            MainGame.map = new Map();
 
-            if (MapLoader.LoadMap(mapPath))
+            if (MapLoader.LoadMap(mapPath, MainGame.map))
             {
                 foreach (var error in MapLoader.Errors)
                 {
                     System.Console.WriteLine(error);
                 }
+                
+                // TODO: give the bounds of the map to the camera
+                // this.camera.Bounds = new Vector2(this.map.width, this.map.height);
             }
 
             if (MapLoader.HasFailed)
             {
-                System.Console.WriteLine(string.Format(CultureInfo.CurrentCulture, "Loading of Map: {0} has failed!", mapPath));
-                throw new AggregateException("Error: Map Load Failure!");
+                throw new AggregateException(string.Format(CultureInfo.CurrentCulture, "Loading of Map: {0} has failed!", mapPath));
             }
 
             Vertices borderVerts = new Vertices();
-            borderVerts.Add(Vector2.Zero.ToSimUnits());
-            borderVerts.Add(new Vector2(0, this.GraphicsDevice.Viewport.Height).ToSimUnits());
-            borderVerts.Add(new Vector2(this.GraphicsDevice.Viewport.Width, this.GraphicsDevice.Viewport.Height).ToSimUnits());
-            borderVerts.Add(new Vector2(this.GraphicsDevice.Viewport.Width, 0).ToSimUnits());
+            borderVerts.Add(Vector2.Zero);
+            borderVerts.Add(new Vector2(0, this.GraphicsDevice.Viewport.Height * 2));
+            borderVerts.Add(new Vector2(this.GraphicsDevice.Viewport.Width * 2, this.GraphicsDevice.Viewport.Height * 2));
+            borderVerts.Add(new Vector2(this.GraphicsDevice.Viewport.Width * 2, 0));
 
-            var border = BodyFactory.CreateLoopShape(MainGame.World, borderVerts);
-            border.Friction = 1f;
-
-            this.backgroundsize = new Rectangle(100, 400, 100, 20);
-            Color[] colors = new Color[this.backgroundsize.Width * this.backgroundsize.Height];
-            for (int i = 0; i < colors.Length; i++)
-            {
-                colors[i] = new Color(255, 255, 0);
-            }
-
-            this.platformVert = new Vertices();
-            foreach (var corner in this.backgroundsize.GetCorners())
-            {
-                this.platformVert.Add(new Vector2(corner.X, corner.Y).ToSimUnits());
-            }
-
-            BodyFactory.CreateLoopShape(MainGame.World, this.platformVert);
+            BodyFactory.CreateLoopShape(MainGame.World, borderVerts.ToSimUnits()).Friction = 10f;
         }
     }
 }
