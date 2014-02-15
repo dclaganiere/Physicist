@@ -30,7 +30,6 @@
             base()
         {
             this.MovementSpeed = new Vector2(1f, 1f);
-
         }
 
         public new Body Body
@@ -45,7 +44,7 @@
                 base.Body = value;
                 base.Body.OnCollision += this.Body_OnCollision;
 
-                //*************************DIMENSIONS ARE TEST VALUES***********************************/
+                // *************************DIMENSIONS ARE TEST VALUES*********************************** //
                 CollisionSensor jumpSensor = new CollisionSensor(FixtureFactory.AttachRectangle(16, 3, 1f, new Vector2(0, 19), this.Body), "jumpSensor");
                 jumpSensor.CollisionDetected += this.SensorCollision;
                 jumpSensor.SeparationDetected += this.SensorSeparation;

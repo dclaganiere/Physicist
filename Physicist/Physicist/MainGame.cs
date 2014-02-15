@@ -12,6 +12,7 @@
     using Microsoft.Xna.Framework.Input;
     using Physicist.Actors;
     using Physicist.Controls;
+    using Physicist.Extensions;
 
     /// <summary>
     /// This is the main type for your game
@@ -24,7 +25,6 @@
 
         private GraphicsDeviceManager graphics;
         private SpriteBatch spriteBatch;
-        private Texture2D testText;
         private Rectangle backgroundsize;
         private Vertices platformVert;
         
@@ -58,11 +58,10 @@
             ContentController.Instance.Initialize(this.Content, "Content");
             MainGame.actors = new List<Actor>();
             MainGame.maps = new List<string>() { "Content\\Levels\\TestLevel.xml" };
+
             //// TODO: Add your initialization logic here
             base.Initialize();
         }
-
-        private SpriteFont myFont;
 
         /// <summary>
         /// LoadContent will be called once per game and is the place to load
@@ -70,13 +69,10 @@
         /// </summary>
         protected override void LoadContent()
         {
-            myFont = this.Content.Load<SpriteFont>("Fonts\\Pericles6");
             // Create a new SpriteBatch, which can be used to draw textures.
             this.spriteBatch = new SpriteBatch(GraphicsDevice);
 
             this.SetupWorld(MainGame.maps[0]);
-
-            // TODO: use this.Content to load your game content here
         }
 
         /// <summary>
@@ -116,14 +112,10 @@
                         actor.Update(gameTime);
                     }
                 }
-
-                // TODO: Add your update logic here
             }
 
             base.Update(gameTime);
         }
-
-        public static Fixture Joint;
 
         /// <summary>
         /// This is called when the game should draw itself.
@@ -134,14 +126,6 @@
             GraphicsDevice.Clear(Color.CornflowerBlue);
             this.spriteBatch.Begin();
 
-            this.spriteBatch.Draw(this.testText, this.platformVert[0].ToDisplayUnits(), Color.White); 
-
-            this.spriteBatch.DrawString(myFont, this.test.Position.ToString(), new Vector2(300, 40), Color.Black, 0f, Vector2.Zero, 2f, SpriteEffects.None, 0f);
-            if (Joint != null)
-            {
-             //   this.spriteBatch.DrawString(myFont, Joint.Position.ToString(), new Vector2(300, 60), Color.Black, 0f, Vector2.Zero, 2f, SpriteEffects.None, 0f);
-            }
-            this.test.Draw(this.spriteBatch);
             MainGame.actors.ForEach(actor => actor.Draw(this.spriteBatch));
 
             base.Draw(gameTime);
@@ -179,7 +163,6 @@
             border.Friction = 1f;
 
             this.backgroundsize = new Rectangle(100, 400, 100, 20);
-            this.testText = new Texture2D(this.GraphicsDevice, this.backgroundsize.Width, this.backgroundsize.Height);
             Color[] colors = new Color[this.backgroundsize.Width * this.backgroundsize.Height];
             for (int i = 0; i < colors.Length; i++)
             {
@@ -193,31 +176,6 @@
             }
 
             BodyFactory.CreateLoopShape(MainGame.World, this.platformVert);
-
-            this.testText.SetData(colors);
-        }
-
-        private void CreateActors()
-        {
-            this.texture = this.Content.Load<Texture2D>("Textures\\NOTSTOLEN");
-
-            GameSprite testSprite = new GameSprite(this.texture, new Size(19, 40));
-            testSprite.AddAnimation(StandardAnimation.Idle, new SpriteAnimation(0, 1, 1));
-            testSprite.AddAnimation(StandardAnimation.Down, new SpriteAnimation(0, 8, 1));
-            testSprite.AddAnimation(StandardAnimation.Up, new SpriteAnimation(0, 8, 1) { FlipVertical = true });
-            testSprite.AddAnimation(StandardAnimation.Right, new SpriteAnimation(1, 8, 1));
-            testSprite.AddAnimation(StandardAnimation.Left, new SpriteAnimation(1, 8, 1) { FlipHorizontal = true });
-            testSprite.CurrentAnimationString = StandardAnimation.Idle.ToString();
-
-            this.test = new Player();
-            this.test.AddSprite("test", testSprite);
-
-            this.test.Body = BodyFactory.CreateRectangle(MainGame.world, ConvertUnits.ToSimUnits(19f), ConvertUnits.ToSimUnits(40f), 100f);
-            this.test.Body.BodyType = BodyType.Dynamic;
-            this.test.Body.CollidesWith = Category.All;
-            this.test.Body.FixedRotation = true;
-            this.test.Position = new Vector2(100f, 100f).ToSimUnits();
-            this.test.MaxSpeed = new Vector2(60f, 120f);
         }
     }
 }

@@ -18,7 +18,7 @@
     public class Actor : IXmlSerializable
     {
         private Dictionary<string, GameSprite> sprites = new Dictionary<string, GameSprite>();
-        private Dictionary<string, CollisionSensor> sensors = new Dictionary<string,CollisionSensor>();
+        private Dictionary<string, CollisionSensor> sensors = new Dictionary<string, CollisionSensor>();
         private Body body;
         private BodyInfo bodyInfo;
 
@@ -145,7 +145,6 @@
                             1f,
                             effect,
                             sprite.Depth);
-
                     }
                 }
             }
@@ -284,6 +283,11 @@
 
         protected void AddSensor(CollisionSensor sensor)
         {
+            if (sensor == null)
+            {
+                throw new ArgumentNullException("sensor");
+            }
+
             this.sensors.Add(sensor.SensorName, sensor);
         }
     }
