@@ -243,5 +243,10 @@
 
             this.sensors.Add(sensor.SensorName, sensor);
         }
+
+        protected void ClearSensors()
+        {
+            this.sensors.Clear();
+        }
     }
 }

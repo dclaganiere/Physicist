@@ -28,8 +28,6 @@
         private CameraController camera;
         private GraphicsDeviceManager graphics;
         private SpriteBatch spriteBatch;
-        private Rectangle backgroundsize;
-        private Vertices platformVert;
 
         public MainGame()
             : base()
@@ -149,7 +147,7 @@
         private void SetupWorld(string mapPath)
         {
             MainGame.world = new World(new Vector2(0f, 9.81f));
-            ConvertUnits.SetDisplayUnitToSimUnitRatio(2f);
+            ConvertUnits.SetDisplayUnitToSimUnitRatio(32f);
             MainGame.map = new Map();
 
             if (MapLoader.LoadMap(mapPath, MainGame.map))
@@ -158,7 +156,7 @@
                 {
                     System.Console.WriteLine(error);
                 }
-                
+
                 // TODO: give the bounds of the map to the camera
                 // this.camera.Bounds = new Vector2(this.map.width, this.map.height);
             }

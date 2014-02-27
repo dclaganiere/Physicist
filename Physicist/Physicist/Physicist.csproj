@@ -75,7 +75,6 @@
     <Compile Include="Extensions\MediaDictionary.cs" />
     <Compile Include="Extensions\Primatives\IMediaInfo.cs" />
     <Compile Include="Extensions\Primatives\MediaElement.cs" />
-    <Compile Include="Extensions\Extensions.cs" />
     <Compile Include="Extensions\Primatives\Size.cs" />
     <Compile Include="Extensions\XmlBodyFactory.cs" />
     <Compile Include="GlobalSuppressions.cs" />
@@ -125,6 +124,8 @@
   <ItemGroup />
   <ItemGroup>
     <None Include="Content\Fonts\Pericles6.xnb">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="Content\Textures\Capsule.xnb">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

@@ -98,7 +98,7 @@
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1002:DoNotExposeGenericLists", Justification = "Follows Farseer pattern")]
         public static Vertices ToSimUnits(this Vertices value)
         {
-            Vertices convertVerts = new Vertices();             
+            Vertices convertVerts = new Vertices();
             if (value != null)
             {
                 foreach (var vert in value)

@@ -19,7 +19,7 @@
     public class Player : Actor, IXmlSerializable
     {
         private bool onGround = true;
-
+        private static readonly float MAX_SPEED = 500f;
         public Player(XElement element)
         {
             if (element == null)
@@ -27,13 +27,17 @@
                 throw new ArgumentNullException("element");
             }
 
+            this.MaxSpeed = new Vector2(MAX_SPEED, MAX_SPEED*5);
             this.XmlDeserialize(element);
         }
 
-        public Player() : 
+        public Player() :
             base()
         {
+            this.MaxSpeed = new Vector2(MAX_SPEED, MAX_SPEED);
         }
+
+        public Vector2 MaxSpeed { get; private set; }
 
         public new Body Body
         {
@@ -44,14 +48,13 @@
 
             set
             {
-                base.Body = value;
-                base.Body.OnCollision += this.Body_OnCollision;
+                if (base.Body != value)
+                {
+                    base.Body.OnCollision -= this.Body_OnCollision;
+                    base.Body = value;
 
-                // *************************DIMENSIONS ARE TEST VALUES*********************************** //
-                CollisionSensor jumpSensor = new CollisionSensor(FixtureFactory.AttachRectangle(16, 3, 1f, new Vector2(0, 19), this.Body), "jumpSensor");
-                jumpSensor.CollisionDetected += this.SensorCollision;
-                jumpSensor.SeparationDetected += this.SensorSeparation;
-                this.AddSensor(jumpSensor);
+                    this.SetUpCollisions();
+                }
             }
         }
 
@@ -68,34 +71,36 @@
             string spriteStateString = string.Empty;
             Vector2 dp = Vector2.Zero;
 
+            spriteStateString = "Idle";
+
             if (ks.IsKeyDown(KeyboardController.UpKey))
             {
                 spriteStateString = "Up";
             }
-            else if (ks.IsKeyDown(KeyboardController.DownKey))
+
+            if (ks.IsKeyDown(KeyboardController.DownKey))
             {
                 spriteStateString = "Down";
             }
-            else if (ks.IsKeyDown(KeyboardController.LeftKey))
+
+            if (ks.IsKeyDown(KeyboardController.LeftKey))
             {
                 dp.X -= this.MovementSpeed.X;
                 spriteStateString = "Left";
             }
-            else if (ks.IsKeyDown(KeyboardController.RightKey))
+
+            if (ks.IsKeyDown(KeyboardController.RightKey))
             {
                 dp.X += this.MovementSpeed.X;
                 spriteStateString = "Right";
             }
-            else if (this.CanJump && ks.IsKeyDown(KeyboardController.JumpKey))
+
+            if (this.CanJump && ks.IsKeyDown(KeyboardController.JumpKey))
             {
                 spriteStateString = "Jump";
-                dp.Y -= 30;
+                dp.Y -= 10;
             }
-            else
-            {
-                spriteStateString = "Idle";
-            }
-            
+
             dp.Y = Math.Abs(this.Body.LinearVelocity.Y + dp.Y) >= this.MaxSpeed.Y ? 0 : dp.Y;
             dp.X = Math.Abs(this.Body.LinearVelocity.X + dp.X) >= this.MaxSpeed.X ? 0 : dp.X;
 
@@ -105,7 +110,7 @@
             {
                 sprite.CurrentAnimationString = spriteStateString;
             }
-            
+
             base.Update(time);
         }
 
@@ -115,15 +120,38 @@
         }
 
         public new void XmlDeserialize(XElement element)
-        {            
+        {
             if (element != null)
             {
                 base.XmlDeserialize(element.Element("Actor"));
             }
+
+            this.SetUpCollisions();
+        }
+
+        private void SetUpCollisions()
+        {
+            this.ClearSensors();
+
+            this.Body.OnCollision += this.Body_OnCollision;
+
+            // *************************DIMENSIONS ARE TEST VALUES*********************************** //
+            this.AddCollisionSensor(
+                "jumpSensor",
+                FixtureFactory.AttachRectangle(16, 3, 1f, new Vector2(0, 19), this.Body));
+        }
+
+        private void AddCollisionSensor(string fixtureName, Fixture fixture)
+        {
+            CollisionSensor jumpSensor = new CollisionSensor(fixture, fixtureName);
+            jumpSensor.CollisionDetected += this.SensorCollision;
+            jumpSensor.SeparationDetected += this.SensorSeparation;
+
+            this.AddSensor(jumpSensor);
         }
 
         private bool Body_OnCollision(Fixture fixtureA, Fixture fixtureB, FarseerPhysics.Dynamics.Contacts.Contact contact)
-        {            
+        {
             return true;
         }
 
