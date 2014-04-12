@@ -6,12 +6,6 @@
 
     public class CollisionSensor
     {
-        public string SensorName
-        {
-            get;
-            private set;
-        }
-
         public CollisionSensor(Fixture sensorFixture, string sensorName)
         {
             this.SensorName = sensorName;
@@ -21,7 +15,14 @@
         }
 
         public event OnCollisionEventHandler CollisionDetected;
+
         public event OnSeparationEventHandler SeparationDetected;
+
+        public string SensorName
+        {
+            get;
+            private set;
+        }
 
         private bool SensorBody_OnCollision(Fixture fixtureA, Fixture fixtureB, Contact contact)
         {
