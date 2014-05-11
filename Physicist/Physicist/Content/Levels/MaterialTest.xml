@@ -126,7 +126,7 @@
 
       <Player class="Player">
         <Actor class="Actor" health="10" rotation="0" isEnabled="true" visibleState="Visible">
-          <MovementSpeed x="3" y="3"/>
+          <MovementSpeed x="15" y="25"/>
           <Sprites>
             <GameSprite spriteName="mario" textureRef="NOTSTOLEN" frameLength="0.2" depth="0">
               <Offset x="0" y="0"/>
@@ -141,7 +141,7 @@
             </GameSprite>
           </Sprites>
           <BodyInfo>
-            <Rectangle width="19" height="40"  density="1" bodyType="Dynamic" fixedRotation="true" friction="2">
+            <Rectangle width="19" height="40"  density="100" bodyType="Dynamic" fixedRotation="true" friction="0">
               <Position x="19" y="40"/>
             </Rectangle>
           </BodyInfo>

@@ -131,6 +131,8 @@
   <ItemGroup />
   <ItemGroup>
     <None Include="Content\Fonts\Pericles6.xnb">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="Content\Textures\Background.xnb">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

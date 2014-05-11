@@ -19,7 +19,7 @@
     public class Player : Actor, IXmlSerializable
     {
         private bool onGround = true;
-        private static readonly float MAX_SPEED = 500f;
+        private static readonly float MAX_SPEED = 4f;
         public Player(XElement element)
         {
             if (element == null)
@@ -27,7 +27,7 @@
                 throw new ArgumentNullException("element");
             }
 
-            this.MaxSpeed = new Vector2(MAX_SPEED, MAX_SPEED*5);
+            this.MaxSpeed = new Vector2(MAX_SPEED, MAX_SPEED);
             this.XmlDeserialize(element);
         }
 
@@ -53,6 +53,8 @@
                     base.Body.OnCollision -= this.Body_OnCollision;
                     base.Body = value;
 
+                    this.Body.LinearDamping = 1.2f;
+
                     this.SetUpCollisions();
                 }
             }
@@ -62,20 +64,26 @@
         {
             get
             {
-                return this.onGround && (Math.Abs(this.Body.LinearVelocity.Y) < 0.5);
+                return this.onGround && (Math.Abs(this.Body.LinearVelocity.Y) < 0.005);
             }
         }
 
+        private bool isJumping;
+        private int jumpTime = 0;
         public void Update(GameTime time, KeyboardState ks)
         {
             string spriteStateString = string.Empty;
             Vector2 dp = Vector2.Zero;
+            
+
 
             spriteStateString = "Idle";
+
 
             if (ks.IsKeyDown(KeyboardController.UpKey))
             {
                 spriteStateString = "Up";
+                this.Body.ApplyLinearImpulse(new Vector2(0, -500 * this.MovementSpeed.Y));
             }
 
             if (ks.IsKeyDown(KeyboardController.DownKey))
@@ -85,26 +93,123 @@
 
             if (ks.IsKeyDown(KeyboardController.LeftKey))
             {
-                dp.X -= this.MovementSpeed.X;
+                this.Body.ApplyForce(new Vector2(-15 * this.MovementSpeed.X, 0));
                 spriteStateString = "Left";
             }
-
-            if (ks.IsKeyDown(KeyboardController.RightKey))
+            else if (ks.IsKeyDown(KeyboardController.RightKey))
             {
-                dp.X += this.MovementSpeed.X;
+                this.Body.ApplyForce(new Vector2(15 * this.MovementSpeed.X, 0));
                 spriteStateString = "Right";
             }
 
-            if (this.CanJump && ks.IsKeyDown(KeyboardController.JumpKey))
+            if (ks.IsKeyDown(KeyboardController.JumpKey))
             {
-                spriteStateString = "Jump";
-                dp.Y -= 10;
+                if ((!this.isJumping && this.CanJump) || (this.isJumping && (jumpTime > 0)))
+                {
+                    if (jumpTime <= 0)
+                    {
+                        jumpTime = 20;
+                        this.Body.ApplyLinearImpulse(new Vector2(0, -4 * this.MovementSpeed.Y));
+                    }
+                    isJumping = true;
+                    this.Body.ApplyForce(new Vector2(0, -10 * this.MovementSpeed.Y));
+                    jumpTime--;
+                    spriteStateString = "Up";
+                }
+            }
+            else
+            {
+                isJumping = false;
+                jumpTime = 0;
             }
 
-            dp.Y = Math.Abs(this.Body.LinearVelocity.Y + dp.Y) >= this.MaxSpeed.Y ? 0 : dp.Y;
-            dp.X = Math.Abs(this.Body.LinearVelocity.X + dp.X) >= this.MaxSpeed.X ? 0 : dp.X;
+            Console.WriteLine("({0:0.00}, {1:0.00})", this.Body.LinearVelocity.X, this.Body.Position.Y);
 
-            this.Body.LinearVelocity += dp;
+
+            //if (ks.IsKeyDown(KeyboardController.UpKey))
+            //{
+            //    spriteStateString = "Up";
+            //}
+
+            //if (ks.IsKeyDown(KeyboardController.DownKey))
+            //{
+            //    spriteStateString = "Down";
+            //}
+
+            //if (ks.IsKeyDown(KeyboardController.LeftKey))
+            //{
+            //    dp.X -= this.MovementSpeed.X;
+            //    spriteStateString = "Left";
+            //}
+
+            //if (ks.IsKeyDown(KeyboardController.RightKey))
+            //{
+            //    dp.X += this.MovementSpeed.X;
+            //    spriteStateString = "Right";
+            //}
+
+            //if (ks.IsKeyDown(KeyboardController.JumpKey))
+            //{
+            //    if((!this.isJumping && this.CanJump) || (this.isJumping && (jumpTime > 0)))
+            //    {
+            //        if(jumpTime <= 0)
+            //        {
+            //            jumpTime = 10;
+            //        }
+            //        isJumping = true;
+            //        dp.Y -= 2;
+            //        Console.WriteLine("We jumping!");
+            //        jumpTime--;
+            //    }
+            //}
+            //else
+            //{
+            //    isJumping = false;
+            //}
+
+
+            //if ((this.Body.LinearVelocity.Y + dp.Y) < 0)
+            //{
+            //    if ((this.Body.LinearVelocity.Y + dp.Y) >= -this.MaxSpeed.Y)
+            //    {
+            //        dp.Y = this.Body.LinearVelocity.Y + dp.Y;
+            //    }
+            //    else
+            //    {
+            //        dp.Y = -this.MaxSpeed.Y;
+            //    }
+            //}
+            //else
+            //{
+            //    dp.Y = this.Body.LinearVelocity.Y;
+            //}
+
+            //if ((this.Body.LinearVelocity.X + dp.X) < 0)
+            //{
+            //    if ((this.Body.LinearVelocity.X + dp.X) >= -this.MaxSpeed.X)
+            //    {
+            //        dp.X = this.Body.LinearVelocity.X + dp.X;
+            //    }
+            //    else
+            //    {
+            //        dp.X = -this.MaxSpeed.X;
+            //    }
+            //}
+            //else
+            //{
+            //    if ((this.Body.LinearVelocity.X + dp.X) <= this.MaxSpeed.X)
+            //    {
+            //        dp.X = this.Body.LinearVelocity.X + dp.X;
+            //    }
+            //    else
+            //    {
+            //        dp.X = this.MaxSpeed.X;
+            //    }
+            //}
+
+            //Console.WriteLine("x={0}, y={1}", dp.X, dp.Y);
+
+            //this.Body.LinearVelocity = dp;
 
             foreach (var sprite in this.Sprites.Values)
             {
@@ -138,7 +243,7 @@
             // *************************DIMENSIONS ARE TEST VALUES*********************************** //
             this.AddCollisionSensor(
                 "jumpSensor",
-                FixtureFactory.AttachRectangle(16, 3, 1f, new Vector2(0, 19), this.Body));
+                FixtureFactory.AttachRectangle(10, 3, 1f, new Vector2(0, 19), this.Body));
         }
 
         private void AddCollisionSensor(string fixtureName, Fixture fixture)

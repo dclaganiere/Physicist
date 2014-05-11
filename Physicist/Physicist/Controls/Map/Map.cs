@@ -25,7 +25,7 @@
             
             BodyFactory.CreateLoopShape(
                             MainGame.World, 
-                            new Vertices() { Vector2.Zero, new Vector2(0, this.Height), new Vector2(this.Width, this.Height), new Vector2(this.Width, 0) }.ToSimUnits()).Friction = 10f;
+                            new Vertices() { Vector2.Zero, new Vector2(0, this.Height), new Vector2(this.Width, this.Height), new Vector2(this.Width, 0) }.ToSimUnits()).Friction = .1f;
         }
 
         public static int CurrentMapWidth { get; private set; }

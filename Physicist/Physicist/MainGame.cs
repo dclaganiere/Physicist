@@ -85,7 +85,8 @@
             this.spriteBatch = new SpriteBatch(GraphicsDevice);
 
             MainGame.world = new World(new Vector2(0f, 9.81f));
-            ConvertUnits.SetDisplayUnitToSimUnitRatio(2f);
+
+            //ConvertUnits.SetDisplayUnitToSimUnitRatio(2f);
 
             MainGame.map = MapLoader.LoadMap(MainGame.maps[0]);
             if (MapLoader.HasFailed || map == null)
